@@ -2,7 +2,7 @@
 module CarrierWave
   module Workers
 
-    class ProcessAsset < Struct.new(:klass, :id, :column)
+    class ProcessAsset < Base
       def self.perform(*args)
         new(*args).perform
       end
@@ -24,11 +24,6 @@ module CarrierWave
       def set_args(klass, id, column)
         self.klass, self.id, self.column = klass, id, column
       end
-
-      def constantized_resource
-        klass.is_a?(String) ? klass.constantize : klass
-      end
-
     end # ProcessAsset
 
   end # Workers

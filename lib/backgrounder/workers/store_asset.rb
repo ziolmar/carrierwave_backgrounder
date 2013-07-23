@@ -2,14 +2,11 @@
 module CarrierWave
   module Workers
 
-    class StoreAsset < Struct.new(:klass, :id, :column)
+    class StoreAsset < Base
       attr_reader :cache_path, :tmp_directory
 
-      def self.perform(*args)
-        new(*args).perform
-      end
-
       def perform(*args)
+        super
         set_args(*args) if args.present?
         record = constantized_resource.find id
 
@@ -26,14 +23,6 @@ module CarrierWave
       end
 
       private
-
-      def set_args(klass, id, column)
-        self.klass, self.id, self.column = klass, id, column
-      end
-
-      def constantized_resource
-        klass.is_a?(String) ? klass.constantize : klass
-      end
 
       def store_directories(record)
         asset, asset_tmp = record.send(:"#{column}"), record.send(:"#{column}_tmp")
