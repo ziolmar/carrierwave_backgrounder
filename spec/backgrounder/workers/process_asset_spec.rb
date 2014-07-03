@@ -5,7 +5,7 @@ require 'backgrounder/workers/process_asset'
 describe CarrierWave::Workers::ProcessAsset do
   let(:worker_class) { CarrierWave::Workers::ProcessAsset }
   let(:user)   { mock('User') }
-  let!(:worker) { worker_class.new(user, '22', :image) }
+  let!(:worker) { worker_class.new(user, '22', :image, :callback_method) }
 
   describe ".perform" do
     it 'creates a new instance and calls perform' do
@@ -28,6 +28,7 @@ describe CarrierWave::Workers::ProcessAsset do
     end
 
     it 'processes versions with image_processing column' do
+      user.expects(:callback_method).once
       user.expects(:respond_to?).with(:image_processing).once.returns(true)
       user.expects(:update_attribute).with(:image_processing, false).once
       worker.perform

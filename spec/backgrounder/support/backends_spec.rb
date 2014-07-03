@@ -81,7 +81,7 @@ module CarrierWave::Backgrounder
       end
 
       context 'resque' do
-        let(:args) { [MockWorker, 'FakeClass', 1, :image] }
+        let(:args) { [MockWorker, 'FakeClass', 1, :image, nil] }
 
         before do
           Resque.expects(:enqueue).with(*args)
@@ -101,7 +101,7 @@ module CarrierWave::Backgrounder
       end
 
       context 'sidekiq' do
-        let(:args) { ['FakeClass', 1, :image] }
+        let(:args) { ['FakeClass', 1, :image, :callback] }
 
         it 'invokes client_push on the class with passed args' do
           MockSidekiqWorker.expects(:client_push).with({ 'class' => MockSidekiqWorker, 'args' => args })
@@ -153,20 +153,20 @@ module CarrierWave::Backgrounder
       end
 
       context 'sucker_punch' do
-        let(:args) { [MockWorker, 'FakeClass', 1, :image] }
+        let(:args) { [MockWorker, 'FakeClass', 1, :image, :callback] }
         let(:job) { mock('job') }
 
         it 'invokes a new worker' do
           MockWorker.expects(:new).returns(worker)
           worker.expects(:async).returns(job)
-          job.expects(:perform).with('FakeClass', 1, :image)
+          job.expects(:perform).with('FakeClass', 1, :image, :callback)
           mock_module.backend :sucker_punch
           mock_module.enqueue_for_backend(*args)
         end
       end
 
       context 'qu' do
-        let(:args) { [MockWorker, 'FakeClass', 1, :image] }
+        let(:args) { [MockWorker, 'FakeClass', 1, :image, :callback] }
         before do
           Qu.expects(:enqueue).with(*args)
         end
@@ -186,19 +186,19 @@ module CarrierWave::Backgrounder
 
       context 'qc' do
         it 'calls enqueue with the passed args' do
-          QC.expects(:enqueue).with("MockWorker.perform", 'FakeClass', 1, 'image')
+          QC.expects(:enqueue).with("MockWorker.perform", 'FakeClass', 1, 'image', :callback)
           mock_module.backend :qc
-          mock_module.enqueue_for_backend(MockWorker, 'FakeClass', 1, :image)
+          mock_module.enqueue_for_backend(MockWorker, 'FakeClass', 1, :image, :callback)
         end
       end
 
       context 'immediate' do
         it 'instantiates a worker passing the args and calls perform' do
           worker = mock('Worker')
-          MockWorker.expects(:new).with('FakeClass', 1, :image).returns(worker)
+          MockWorker.expects(:new).with('FakeClass', 1, :image, :callback).returns(worker)
           worker.expects(:perform)
           mock_module.backend :immediate
-          mock_module.enqueue_for_backend(MockWorker, 'FakeClass', 1, :image)
+          mock_module.enqueue_for_backend(MockWorker, 'FakeClass', 1, :image, :callback)
         end
       end
 

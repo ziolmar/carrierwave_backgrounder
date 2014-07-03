@@ -6,7 +6,7 @@ describe CarrierWave::Workers::StoreAsset do
   let(:fixtures_path) { File.expand_path('../fixtures/images', __FILE__) }
   let(:worker_class) { CarrierWave::Workers::StoreAsset }
   let(:user) { mock('User') }
-  let!(:worker) { worker_class.new(user, '22', :image) }
+  let!(:worker) { worker_class.new(user, '22', :image, :callback_method) }
 
   describe ".perform" do
     it 'creates a new instance and calls perform' do
@@ -34,6 +34,7 @@ describe CarrierWave::Workers::StoreAsset do
     it 'removes tmp directory on success' do
       FileUtils.expects(:rm_r).with(fixtures_path, :force => true).once
       user.expects(:save!).once.returns(true)
+      user.expects(:callback_method).once
       worker.perform
     end
 
