@@ -44,7 +44,7 @@ module CarrierWave
 
             def enqueue_#{column}_background_job
               if enqueue_#{column}_background_job?
-                CarrierWave::Backgrounder.enqueue_for_backend(#{worker}, self.class.name, id, #{column}.mounted_as, callback)
+                CarrierWave::Backgrounder.enqueue_for_backend(#{worker}, self.class.name, id, #{column}.mounted_as, #{callback})
                 @#{column}_changed = false
               end
             end
